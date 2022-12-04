@@ -16,14 +16,14 @@ func (d *Today) Init(input string) error {
 	fileContents, err := lib.ReadFile(input)
 	elfs := strings.Split(fileContents, "\n\n")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	d.elves = make([][]int, len(elfs))
 	for i, elfInput := range elfs {
 		result, err := lib.ParseIntegerSlice(elfInput, "\n")
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		d.elves[i] = result
