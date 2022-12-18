@@ -11,3 +11,13 @@ func Sum[T Number](slice []T) T {
 	}
 	return total
 }
+
+func Max[T Number](slice []T) T {
+	var max T
+	for _, val := range slice {
+		if max < val {
+			max = val
+		}
+	}
+	return max
+}
