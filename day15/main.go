@@ -9,8 +9,8 @@ import (
 )
 
 type Today struct {
-	sensors   []lib.Pair[int, int]
-	beacons   []lib.Pair[int, int]
+	sensors   []lib.Point[int]
+	beacons   []lib.Point[int]
 	distances []int
 
 	maxX int
@@ -20,22 +20,14 @@ type Today struct {
 	part2Size   int
 }
 
-func hashPoint(p lib.Pair[int, int]) string {
-	return fmt.Sprintf("%d,%d", p.Left, p.Right)
-}
-
-func distance(p1 lib.Pair[int, int], p2 lib.Pair[int, int]) int {
-	return int(math.Abs(float64(p2.Left-p1.Left)) + math.Abs(float64(p2.Right-p1.Right)))
-}
-
 func (d *Today) Init(input string) error {
 	raw, err := lib.ReadStringFile(input)
 	if err != nil {
 		return err
 	}
 
-	d.sensors = make([]lib.Pair[int, int], len(raw))
-	d.beacons = make([]lib.Pair[int, int], len(raw))
+	d.sensors = make([]lib.Point[int], len(raw))
+	d.beacons = make([]lib.Point[int], len(raw))
 	d.distances = make([]int, len(raw))
 	for i, line := range raw {
 		var sx, sy, bx, by int
@@ -44,9 +36,9 @@ func (d *Today) Init(input string) error {
 			return err
 		}
 
-		d.sensors[i] = lib.NewPair(sx, sy)
-		d.beacons[i] = lib.NewPair(bx, by)
-		d.distances[i] = distance(d.sensors[i], d.beacons[i])
+		d.sensors[i] = lib.NewPoint(sx, sy)
+		d.beacons[i] = lib.NewPoint(bx, by)
+		d.distances[i] = d.sensors[i].ManhattanDistance(d.beacons[i])
 
 		x := int(math.Max(float64(sx), float64(bx)))
 		if d.maxX < x {
@@ -72,17 +64,17 @@ func (d *Today) Init(input string) error {
 func (d *Today) Part1() (string, error) {
 	counter := 0
 
-	pt := lib.NewPair(0, d.part1Target)
+	pt := lib.NewPoint(0, d.part1Target)
 	for x := d.minX * 2; x <= d.maxX*2; x++ {
 		inBounds := false
-		pt.Left = x
+		pt.X = x
 		for i, sensor := range d.sensors {
-			if pt.Left == d.beacons[i].Left && pt.Right == d.beacons[i].Right {
+			if pt.X == d.beacons[i].X && pt.Y == d.beacons[i].Y {
 				inBounds = false
 				break
 			}
 
-			dist := distance(pt, sensor)
+			dist := pt.ManhattanDistance(sensor)
 			if dist <= d.distances[i] {
 				inBounds = true
 			}
@@ -96,15 +88,15 @@ func (d *Today) Part1() (string, error) {
 }
 
 func (d *Today) Part2() (string, error) {
-	pt := lib.NewPair(0, 0)
+	pt := lib.NewPoint(0, 0)
 	for x := 0; x <= d.part2Size; x++ {
 		for y := 0; y <= d.part2Size; y++ {
-			pt.Left = x
-			pt.Right = y
+			pt.X = x
+			pt.Y = y
 
 			valid := true
 			for i, sensor := range d.sensors {
-				dist := distance(pt, sensor)
+				dist := pt.ManhattanDistance(sensor)
 				if dist <= d.distances[i] {
 					valid = false
 
